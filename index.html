@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' blob: data:; style-src 'self'; script-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'none'"
+    />
+    <title>Studio ZPL</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="logo">Z</span>
+        <div>Studio <b>ZPL</b><small>WEB · ESTÚDIO DE ETIQUETAS</small></div>
+      </div>
+      <span class="offline">● Prévia local · no navegador</span>
+      <div class="actions">
+        <button id="open">Abrir ZPL</button
+        ><button id="save">Salvar ZPL preenchido</button
+        ><button class="primary" id="export">Exportar PNG ↗</button>
+      </div>
+    </header>
+    <main>
+      <aside>
+        <details id="settingsPanel" open>
+          <summary>
+            Configurar etiqueta <span>Dimensões, dados e logo</span>
+          </summary>
+          <div class="settings-content">
+            <div class="eyebrow">CONFIGURAÇÃO</div>
+            <h2>Sua etiqueta</h2>
+            <p>Do código à impressão, em um só lugar.</p>
+            <label>Dimensões <span>mm</span></label>
+            <div class="dimensions">
+              <div>
+                <small>Largura</small
+                ><input
+                  id="width"
+                  type="number"
+                  min="10"
+                  max="300"
+                  value="100"
+                />
+              </div>
+              <span>×</span>
+              <div>
+                <small>Altura</small
+                ><input
+                  id="height"
+                  type="number"
+                  min="10"
+                  max="500"
+                  value="60"
+                />
+              </div>
+            </div>
+            <label for="dpi">Resolução da impressora</label
+            ><select id="dpi">
+              <option value="203">203 dpi · 8 pontos/mm</option>
+              <option value="300">300 dpi · 12 pontos/mm</option>
+              <option value="600">600 dpi · 24 pontos/mm</option>
+            </select>
+            <section>
+              <div class="divider"></div>
+              <div class="eyebrow">DADOS DO MODELO</div>
+              <label for="referencia">Referência</label
+              ><input
+                id="referencia"
+                value="PAT-000123"
+                maxlength="200"
+              /><label for="codigoRFID">Código RFID (hexadecimal)</label
+              ><input
+                id="codigoRFID"
+                value="E2000017221101441890ABCD"
+                maxlength="512"
+              />
+              <p>
+                Os campos substituem ${referencia} e ${codigoRFID} na prévia e
+                no ZPL preenchido.
+              </p>
+            </section>
+            <div class="divider"></div>
+            <div class="eyebrow">ELEMENTOS</div>
+            <h3>Adicione à etiqueta</h3>
+            <button class="element" id="text">
+              Tt <span>Texto<small>Um título ou informação</small></span
+              >＋</button
+            ><button class="element" id="box">
+              ▢ <span>Caixa / linha<small>Organize o conteúdo</small></span
+              >＋</button
+            ><button class="element" id="barcode">
+              ▥ <span>Código de barras<small>Code 128</small></span
+              >＋</button
+            ><button class="element" id="qr">
+              ▦ <span>QR Code<small>Modelo 2 · leitura real</small></span
+              >＋
+            </button>
+            <section>
+              <div class="divider"></div>
+              <div class="eyebrow">IMAGENS DA IMPRESSORA · ^XG</div>
+              <label for="graphicName">Nome da imagem na impressora</label
+              ><input id="graphicName" value="E:SSGFX000.GRF" /><label
+                for="printerImageWidth"
+                >Largura do logo (mm)</label
+              ><input
+                id="printerImageWidth"
+                type="number"
+                value="15"
+                min="1"
+                max="300"
+              /><label for="printerThreshold">Contraste preto/branco</label
+              ><input
+                id="printerThreshold"
+                type="range"
+                min="0"
+                max="255"
+                value="160"
+              /><button id="importGRF" class="wide">
+                Importar PNG / PDF / GRF
+              </button>
+              <div id="pdfOptions" hidden>
+                <label for="pdfPage">Página do PDF</label>
+                <select id="pdfPage"></select>
+                <p id="pdfFileInfo"></p>
+              </div>
+              <div id="graphicList" class="graphic-list"></div>
+              <p>
+                Selecione um PNG/JPG ou PDF: ele será convertido para GRF e
+                associado ao nome acima automaticamente. A prévia usa essa
+                imagem nos comandos ^XG. A exportação inclui o logo para
+                carregar na impressora.
+              </p>
+              <p id="graphicImportStatus" role="status"></p>
+            </section>
+            <div class="tip">
+              <b>Um espaço para experimentar</b>
+              <p>
+                Edite o ZPL e acompanhe a prévia automaticamente. Seu rascunho
+                fica salvo neste computador.
+              </p>
+            </div>
+            <details class="command-reference">
+              <summary>Referência de comandos ZPL</summary>
+              <label for="commandSearch">Buscar comando</label>
+              <input id="commandSearch" placeholder="Ex.: ^F8, ^A@, ^BQ" />
+              <div id="commandCatalog"></div>
+              <p>
+                O catálogo reconhece comandos de formatação, memória, rede e
+                RFID. O suporte visual depende do comando e dos parâmetros.
+              </p>
+            </details>
+          </div>
+        </details>
+      </aside>
+      <section class="workspace">
+        <nav class="view-tabs" aria-label="Visualização do espaço de trabalho">
+          <button
+            id="editorTab"
+            aria-controls="editorPanel"
+            aria-pressed="true"
+          >
+            Editor ZPL
+          </button>
+          <button
+            id="previewTab"
+            aria-controls="previewPanel"
+            aria-pressed="false"
+          >
+            Prévia da etiqueta
+          </button>
+        </nav>
+        <div id="editorPanel" class="panel editor">
+          <div class="panel-head">
+            <div>
+              <span class="dot"></span> Editor ZPL
+              <small>fonte da etiqueta</small>
+            </div>
+            <div>
+              <button id="patrimonio">Modelo patrimônio</button
+              ><button id="example">Exemplo</button>
+            </div>
+          </div>
+          <div class="code-area">
+            <div id="numbers"></div>
+            <textarea
+              id="code"
+              spellcheck="false"
+              aria-label="Código ZPL"
+            ></textarea>
+          </div>
+          <footer>
+            <span id="lineCount"></span
+            ><button id="saveTemplate">Salvar modelo</button>
+          </footer>
+          <details id="commandDetails">
+            <summary>Comandos deste código</summary>
+            <div id="commandInfo"></div>
+          </details>
+        </div>
+        <div id="previewPanel" class="panel preview">
+          <div class="panel-head">
+            <div>
+              Prévia <small>atualização automática · fontes aproximadas</small>
+            </div>
+            <div>
+              <button
+                id="fitPreview"
+                aria-label="Ajustar etiqueta à área disponível"
+              >
+                Ajustar
+              </button>
+              <button id="zoomOut" aria-label="Diminuir zoom">−</button
+              ><span id="zoomLabel">100%</span
+              ><button id="zoomIn" aria-label="Aumentar zoom">＋</button>
+            </div>
+          </div>
+          <div class="preview-area">
+            <div class="preview-content">
+              <canvas id="canvas" aria-label="Prévia da etiqueta"></canvas>
+            </div>
+          </div>
+          <div id="rfidInfo" hidden></div>
+          <div id="warnings" role="status" hidden></div>
+          <footer>
+            <span id="sizeInfo"></span><span id="status">Pronto</span>
+          </footer>
+        </div>
+      </section>
+    </main>
+    <input id="file" type="file" accept=".zpl,.txt" hidden /><input
+      id="grfFile"
+      type="file"
+      accept=".grf,.zpl,.txt"
+      hidden
+    />
+    <script src="vendor/qr.js"></script>
+    <script src="zpl.js"></script>
+    <script src="commands.js"></script>
+    <script src="vendor/barcodes.js"></script>
+    <script src="image-utils.js"></script>
+    <script src="vendor/pdf.js"></script>
+    <script src="templates.js"></script>
+    <script src="editor.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

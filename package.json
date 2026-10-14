@@ -1,0 +1,25 @@
+{
+  "name": "studio-zpl",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Simulador ZPL web com QR Code, imagens e modelos RFID",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "build": "node build.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "bwip-js": "^4.11.4",
+    "pdfjs-dist": "5.5.207",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "prettier": "^3.9.10"
+  }
+}
