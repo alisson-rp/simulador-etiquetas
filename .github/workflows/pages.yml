@@ -15,6 +15,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.pages-artifact.outputs.name }}
     permissions:
       contents: read
       pages: read
@@ -33,8 +35,12 @@ jobs:
       - name: Verificar formatação
         run: npm run format:check
       - uses: actions/configure-pages@v5
+      - name: Definir nome do artefato
+        id: pages-artifact
+        run: echo "name=github-pages-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v4
         with:
+          name: ${{ steps.pages-artifact.outputs.name }}
           path: web-dist
 
   deploy:
@@ -51,3 +57,5 @@ jobs:
       - name: Publicar
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.build.outputs.artifact-name }}
