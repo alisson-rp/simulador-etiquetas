@@ -218,11 +218,14 @@ function saveSource(template = false) {
   )
     return;
   const source = template ? $('code').value : filledSource();
+  const content = template
+    ? definitions(source) + source
+    : (source.match(/\^XA[\s\S]*?\^XZ/gi) || []).join('\n');
   download(
-    new Blob([definitions(source) + source], {
+    new Blob([content], {
       type: 'text/plain;charset=utf-8',
     }),
-    template ? 'modelo.zpl' : 'etiqueta.zpl',
+    template ? 'modelo.zpl' : 'etiqueta.txt',
   );
 }
 $('code').addEventListener('input', () => {
